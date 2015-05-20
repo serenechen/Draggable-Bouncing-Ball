@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="SiyuChen"/>
+<meta name="copyright" content="Siyu's work" />
+<title>Draggable Buncing Ball</title>
+<style>
+* {
+	margin: 0;
+	padding: 0;
+}
+div#ball {
+	width: 100px;
+	height: 100px;
+	background: red;
+	position: absolute; 
+	top: 0;
+	left: 0;
+	border-radius: 50%;
+}
+</style>
+<script type="text/javascript">
+window.onload = function() {
+	var oBall = document.getElementsByTagName('div')[0];
+	var disX = 0;          //set the initial variable
+	var disY = 0;   
+	var speedX = 0; 
+	var speedY = 0; 
+	var lastX = 0; 
+	var lastY = 0;
+	oBall.onmousedown = function(ev) {
+		var oEvent = ev||event;
+		
+		disX = oEvent.clientX-oBall.offsetLeft;  //record the distance from cursor to the object
+		disY = oEvent.clientY-oBall.offsetTop;
+		clearInterval(oBall.timer);             //clearInterval before every setInterval
+		document.onmousemove = function(ev) {
+			var oEvent = ev||event;
+			var l = oEvent.clientX-disX;
+			var t = oEvent.clientY-disY;
+			
+			speedX = l-lastX;  //if user moves cursor fast, the initial speed will be correspondingly faster
+			speedY = t-lastY;
+
+			lastX = l;  //record the x,y axis position into lastX and lastY for next move;
+			lastY = t;
+
+			oBall.style.left = l+'px';       //make sure the ball follows the cursor
+			oBall.style.top = t+'px';
+		};
+		document.onmouseup = function(ev) {
+			document.onmousemove = null;       //release the onmousemove and onmouseup event handler
+			document.onmouseup = null;
+			move(oBall);    
+			oBall.releaseCapture&&oBall.releaseCapture();
+		}
+		oBall.setCapture&&oBall.setCapture();  //prevent default behavior in IE 6.0
+		return false;
+	};
+	function move(obj) {
+		clearInterval(obj.timer);
+		obj.timer = setInterval(function() {
+			speedY+=3;                         //simulates the constant acceleration of gravity 
+			var l = obj.offsetLeft+speedX;     //calculates the left and top move 
+			var t = obj.offsetTop +speedY;
+			if(l>=document.documentElement.clientWidth-obj.offsetWidth) {     //the ball moves to the rightmost edge of the screen   
+				speedX*=-0.85;                                       //change the ball's horizontal direction, and decrease the speed  
+				speedY*=0.85;
+				l=document.documentElement.clientWidth-obj.offsetWidth;
+			} else if(l<=0) {                                                 //the ball moves to the leftmost edge of the screen  
+				speedX*=-0.85;										//change the ball's horizontal direction, and decrease the speed 
+				speedY*=0.85;
+				l=0;
+			}
+			if(t>=document.documentElement.clientHeight-obj.offsetHeight) {     //the ball moves to the lowermost edge of the screen  
+				speedX*=0.85;									    	//change the ball's vertical direction, and decrease the speed
+				speedY*=-0.85;
+				t=document.documentElement.clientHeight-obj.offsetHeight;
+			} else if(t<=0) {											        	 //the ball moves to the top edge of the screen
+				speedX*=0.85;											//change the ball's vertical direction, and decrease the speed
+				speedY*=-0.85;
+				t=0;
+			}
+			obj.style.left = l+'px';
+			obj.style.top = t+'px';  
+			if(Math.round(speedX)==0&&Math.round(speedY==0)&&Math.round(obj.offsetTop)==Math.round(document.documentElement.clientHeight-obj.offsetHeight)) {					//if speed equals to 0 and ball's on the ground, clearInterval
+				clearInterval(obj.timer);
+			}
+		},30);
+	}
+
+};
+</script>
+</head>
+
+<body>
+<div id="ball"></div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
